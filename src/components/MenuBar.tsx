@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Upload, Settings, Image, Users, Trash2 } from 'lucide-react';
+import { Menu, Upload, Settings, Image, Users, Trash2, Type } from 'lucide-react';
 
 interface MenuBarProps {
   onUploadImages: (files: FileList) => void;
@@ -8,9 +8,10 @@ interface MenuBarProps {
   currentLimit: number;
   wishCount: number;
   imageCount: number;
+  onManageWords: () => void;
 }
 
-const MenuBar: React.FC<MenuBarProps> = ({ onUploadImages, onDeleteImage, onSetLimit, currentLimit, wishCount, imageCount }) => {
+const MenuBar: React.FC<MenuBarProps> = ({ onUploadImages, onDeleteImage, onSetLimit, currentLimit, wishCount, imageCount, onManageWords }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showImagesModal, setShowImagesModal] = useState(false);
@@ -74,6 +75,17 @@ const MenuBar: React.FC<MenuBarProps> = ({ onUploadImages, onDeleteImage, onSetL
                   >
                     <Image className="w-5 h-5 text-gray-500" />
                     <span className="text-gray-700">Manage Images</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      onManageWords();
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 w-full text-left transition-colors"
+                  >
+                    <Type className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-700">Manage Words</span>
                   </button>
                   
                   <div className="px-4 py-3 border-t border-gray-100">

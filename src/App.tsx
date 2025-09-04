@@ -4,6 +4,7 @@ import QRCodeGenerator from './components/QRCodeGenerator';
 import WishForm from './components/WishForm';
 import MenuBar from './components/MenuBar';
 import TypographyPage from './components/TypographyPage';
+import WordManagementPage from './components/WordManagementPage';
 import { googleSheetsService } from './services/googleSheets';
 import { Wish, AppSettings } from './types';
 import { Plus } from 'lucide-react';
@@ -11,7 +12,7 @@ import { Plus } from 'lucide-react';
 function App() {
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'main' | 'typography'>('main');
+  const [currentPage, setCurrentPage] = useState<'main' | 'typography' | 'words'>('main');
   const [settings, setSettings] = useState<AppSettings>({
     wishLimit: 50,
     backgroundImages: ['/api/placeholder/1200/800'], // Your uploaded image will be added here
@@ -60,6 +61,28 @@ function App() {
     }
   };
 
+  const handleUpdateWish = async (wishId: string, newText: string) => {
+    try {
+      const updatedWish = await googleSheetsService.updateWish(wishId, { text: newText });
+      if (updatedWish) {
+        setWishes(prev => prev.map(w => w.id === wishId ? updatedWish : w));
+      }
+    } catch (error) {
+      console.error('Error updating wish:', error);
+    }
+  };
+
+  const handleDeleteWish = async (wishId: string) => {
+    try {
+      const success = await googleSheetsService.deleteWish(wishId);
+      if (success) {
+        setWishes(prev => prev.filter(w => w.id !== wishId));
+      }
+    } catch (error) {
+      console.error('Error deleting wish:', error);
+    }
+  };
+
   const handleUploadImage = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -84,6 +107,17 @@ function App() {
     });
   };
 
+  if (currentPage === 'words') {
+    return (
+      <WordManagementPage
+        wishes={wishes}
+        onBack={() => setCurrentPage('main')}
+        onUpdateWish={handleUpdateWish}
+        onDeleteWish={handleDeleteWish}
+      />
+    );
+  }
+
   const handleSetLimit = (limit: number) => {
     setSettings(prev => ({
       ...prev,
@@ -99,6 +133,7 @@ function App() {
         backgroundImages={settings.backgroundImages}
         onBack={() => setCurrentPage('main')}
         onDeleteImage={handleDeleteImage}
+        onUploadImages={handleUploadImages}
       />
     );
   }
@@ -124,6 +159,7 @@ function App() {
           currentLimit={settings.wishLimit}
           wishCount={wishes.length}
           imageCount={settings.backgroundImages.length}
+          onManageWords={() => setCurrentPage('words')}
         />
         
         {settings.isLimitReached && (
