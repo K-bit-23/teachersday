@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import ReactWordcloud from 'react-wordcloud';
+import React, { useEffect, useRef } from 'react';
 import { Wish } from '../types';
 
 interface WordCloudProps {
@@ -7,65 +6,71 @@ interface WordCloudProps {
 }
 
 const WordCloud: React.FC<WordCloudProps> = ({ wishes }) => {
-  const [words, setWords] = useState<Array<{ text: string; value: number }>>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const processWishes = () => {
-      const wordFreq: { [key: string]: number } = {};
-      
-      wishes.forEach(wish => {
-        const words = wish.text.toLowerCase().split(/\s+/);
-        words.forEach(word => {
-          const cleanWord = word.replace(/[^\w]/g, '');
-          if (cleanWord.length > 2) {
-            wordFreq[cleanWord] = (wordFreq[cleanWord] || 0) + 1;
-          }
-        });
+    if (!canvasRef.current || wishes.length === 0) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size
+    canvas.width = 800;
+    canvas.height = 400;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Create word frequency map
+    const wordFreq = new Map<string, number>();
+    wishes.forEach(wish => {
+      const words = wish.text.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+      words.forEach(word => {
+        wordFreq.set(word, (wordFreq.get(word) || 0) + 1);
       });
+    });
 
-      const wordArray = Object.entries(wordFreq)
-        .map(([text, value]) => ({ text, value }))
-        .sort((a, b) => b.value - a.value)
-        .slice(0, 50);
+    // Sort words by frequency
+    const sortedWords = Array.from(wordFreq.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 50); // Limit to top 50 words
 
-      setWords(wordArray);
-    };
+    // Colors for Teachers Day theme
+    const colors = [
+      '#FF6B35', '#F7931E', '#FFD23F', '#EE4B2B', '#FF8C42',
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'
+    ];
 
-    processWishes();
+    // Draw words
+    sortedWords.forEach(([word, freq], index) => {
+      const fontSize = Math.max(16, Math.min(48, freq * 8));
+      ctx.font = `bold ${fontSize}px Arial`;
+      ctx.fillStyle = colors[index % colors.length];
+
+      // Random position (with some collision avoidance)
+      const x = Math.random() * (canvas.width - ctx.measureText(word).width);
+      const y = Math.random() * (canvas.height - fontSize) + fontSize;
+
+      ctx.fillText(word, x, y);
+    });
   }, [wishes]);
 
-  const options = {
-    colors: ['#FF6B35', '#F7931E', '#FFD23F', '#E74C3C', '#9B59B6', '#3498DB'],
-    enableTooltip: true,
-    deterministic: false,
-    fontFamily: 'Inter, sans-serif',
-    fontSizes: [20, 80],
-    fontStyle: 'normal',
-    fontWeight: 'bold',
-    padding: 4,
-    rotations: 3,
-    rotationAngles: [0, 90],
-    scale: 'sqrt',
-    spiral: 'archimedean',
-    transitionDuration: 1000,
-  };
-
   return (
-    <div className="w-full h-full bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl shadow-lg overflow-hidden">
-      <div className="p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
-          Teachers Day Wishes
-        </h2>
-        {words.length > 0 ? (
-          <div style={{ height: '400px' }}>
-            <ReactWordcloud words={words} options={options} />
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-64 text-gray-500">
-            <p>No wishes yet. Be the first to share your thoughts!</p>
-          </div>
-        )}
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+        Teachers Day Wishes Cloud
+      </h2>
+      <div className="flex justify-center">
+        <canvas
+          ref={canvasRef}
+          className="border border-gray-200 rounded-lg max-w-full h-auto"
+          style={{ maxWidth: '100%', height: 'auto' }}
+        />
       </div>
+      <p className="text-sm text-gray-500 mt-4 text-center">
+        {wishes.length} wishes collected
+      </p>
     </div>
   );
 };
