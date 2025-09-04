@@ -3,7 +3,7 @@ import WordCloud from './components/WordCloud';
 import QRCodeGenerator from './components/QRCodeGenerator';
 import WishForm from './components/WishForm';
 import MenuBar from './components/MenuBar';
-import TypographyGenerator from './components/TypographyGenerator';
+import TypographyPage from './components/TypographyPage';
 import { googleSheetsService } from './services/googleSheets';
 import { Wish, AppSettings } from './types';
 import { Plus } from 'lucide-react';
@@ -11,7 +11,7 @@ import { Plus } from 'lucide-react';
 function App() {
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isTypographyOpen, setIsTypographyOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState<'main' | 'typography'>('main');
   const [settings, setSettings] = useState<AppSettings>({
     wishLimit: 50,
     backgroundImages: ['/api/placeholder/1200/800'], // Your uploaded image will be added here
@@ -30,7 +30,7 @@ function App() {
         setSettings(prev => ({ ...prev, isLimitReached: true }));
         // Auto-open typography generator when limit is reached
         setTimeout(() => {
-          setIsTypographyOpen(true);
+          setCurrentPage('typography');
         }, 2000);
       }
     };
@@ -71,6 +71,13 @@ function App() {
     reader.readAsDataURL(file);
   };
 
+  const handleDeleteImage = (index: number) => {
+    setSettings(prev => ({
+      ...prev,
+      backgroundImages: prev.backgroundImages.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleUploadImages = (files: FileList) => {
     Array.from(files).forEach(file => {
       handleUploadImage(file);
@@ -84,6 +91,17 @@ function App() {
       isLimitReached: wishes.length >= limit,
     }));
   };
+
+  if (currentPage === 'typography') {
+    return (
+      <TypographyPage
+        wishes={wishes}
+        backgroundImages={settings.backgroundImages}
+        onBack={() => setCurrentPage('main')}
+        onDeleteImage={handleDeleteImage}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -101,6 +119,7 @@ function App() {
       <div className="max-w-7xl mx-auto">
         <MenuBar
           onUploadImages={handleUploadImages}
+          onDeleteImage={handleDeleteImage}
           onSetLimit={handleSetLimit}
           currentLimit={settings.wishLimit}
           wishCount={wishes.length}
@@ -131,10 +150,10 @@ function App() {
             
             {wishes.length > 0 && (
               <button
-                onClick={() => setIsTypographyOpen(true)}
+                onClick={() => setCurrentPage('typography')}
                 className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-4 rounded-2xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center gap-2 font-semibold shadow-lg"
               >
-                Create Typography Art
+                Next
               </button>
             )}
           </div>
@@ -146,14 +165,6 @@ function App() {
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleSubmitWish}
       />
-      
-      {isTypographyOpen && (
-        <TypographyGenerator
-          wishes={wishes}
-          backgroundImages={settings.backgroundImages}
-          onClose={() => setIsTypographyOpen(false)}
-        />
-      )}
     </div>
   );
 }
