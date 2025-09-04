@@ -7,7 +7,7 @@ const QRCodeGenerator: React.FC = () => {
   useEffect(() => {
     const generateQR = async () => {
       try {
-        const url = `/wish-form`;
+        const url = `/WishForm`;
         const qrData = await QRCode.toDataURL(url, {
           width: 256,
           margin: 2,
