@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import { Download, ChevronLeft, ChevronRight, Grid, Image as ImageIcon } from "lucide-react";
+import { Wish } from "../types";
 
 interface TypographyGeneratorProps {
-  wishes: string[];
+  wishes: Wish[];
   backgroundImages: string[];
 }
 
@@ -77,7 +78,7 @@ const TypographyGenerator: React.FC<TypographyGeneratorProps> = ({
                 transform: `rotate(${(index - wishes.length / 2) * 5}deg)`,
               }}
             >
-              {wish}
+              {wish.text}
             </div>
           ))}
         </div>
@@ -122,7 +123,7 @@ const TypographyGenerator: React.FC<TypographyGeneratorProps> = ({
                       transform: `rotate(${(wishIndex - imageWishes.length / 2) * 3}deg)`,
                     }}
                   >
-                    {wish}
+                    {wish.text}
                   </div>
                 ))}
               </div>
