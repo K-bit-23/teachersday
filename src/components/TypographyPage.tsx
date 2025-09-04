@@ -8,6 +8,7 @@ interface TypographyPageProps {
   backgroundImages: string[];
   onBack: () => void;
   onDeleteImage: (index: number) => void;
+  onUploadImages: (files: FileList) => void;
 }
 
 const TypographyPage: React.FC<TypographyPageProps> = ({
@@ -15,6 +16,7 @@ const TypographyPage: React.FC<TypographyPageProps> = ({
   backgroundImages,
   onBack,
   onDeleteImage,
+  onUploadImages,
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
