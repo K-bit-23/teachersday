@@ -7,7 +7,7 @@ const QRCodeGenerator: React.FC = () => {
   useEffect(() => {
     const generateQR = async () => {
       try {
-        const url = `https://myapp.com/WishForm`;
+        const url = `https://teachersday-sepia.vercel.app/WishForm`;
         const qrData = await QRCode.toDataURL(url, {
           width: 256,
           margin: 2,
