@@ -191,30 +191,6 @@ const MenuBar: React.FC<MenuBarProps> = ({ onUploadImages, onDeleteImage, onSetL
           </div>
         </div>
       )}
-                <div key={index} className="relative group">
-                  <div className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center">
-                    <span className="text-gray-500">Image {index + 1}</span>
-                  </div>
-                  <button
-                    onClick={() => onDeleteImage(index)}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowImagesModal(false)}
-                className="flex-1 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
